@@ -1,13 +1,24 @@
 {
-  "rid": "ar-1234567890",
-  "when": "2025-10-08T12:00:00Z",
+  "rid": "ar_2025-10-10T10-00-00Z_aaaa",
+  "when": "2025-10-10T10:00:00Z",
   "issuer": "did:web:openreceipts.dev",
-  "where": {"host": "example.com", "coarse": "US-West"},
-  "what": {"badge": "green", "kind": "ai-eval"},
-  "flags": [],
-  "metrics": {"score": 0.85},
-  "basis": "hash-of-input",
-  "kid": "key1",
-  "schema": "0.1",
-  "sig": "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b"
+  "where": {
+    "coarse": "US-West",
+    "host": "example.com"
+  },
+  "what": {
+    "badge": "amber",
+    "kind": "case"
+  },
+  "flags": [
+    "amber:novel",
+    "route:experiment"
+  ],
+  "metrics": {
+    "score": 85
+  },
+  "basis": "sha256:inputs-abc",
+  "kid": "dev-1",
+  "schema": "or.v0.1",
+  "sig": "f6d10561d3551e0730bdd7cf13e69e3a7be99fb5f0958fbfd5e9fec0b0946f27d5b71e4c1fd7ff4cdbd75c370a2f67fbe8b9fea21d3f1889e89b30a705d3c478"
 }
