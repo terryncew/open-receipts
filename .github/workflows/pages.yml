@@ -10,16 +10,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Basic sanity (files exist)
+
+      - name: Show tree for debugging
         run: |
-          test -f SPEC.md
-          test -f registry/issuers.json
-          test -f test-vectors/valid_ar.json
-          test -f docs/index.html
+          echo "Repository tree:"
+          ls -la
+          echo "--- docs/ ---"
+          [ -d docs ] && ls -la docs || true
+          echo "--- test-vectors/ ---"
+          [ -d test-vectors ] && ls -la test-vectors || true
+          echo "--- registry/ ---"
+          [ -d registry ] && ls -la registry || true
+
+      - name: Basic sanity (files exist, with fallbacks)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # SPEC.md can be at repo root or docs/
+          if [ -f SPEC.md ]; then
+            echo "Found SPEC.md in repo root"
+          elif [ -f docs/SPEC.md ]; then
+            echo "Found SPEC.md in docs/"
+          else
+            echo "::error::SPEC.md missing (searched: SPEC.md, docs/SPEC.md)"
+            exit 1
+          fi
+
+          for p in registry/issuers.json test-vectors/valid_ar.json docs/index.html; do
+            if [ ! -f "$p" ]; then
+              echo "::error::Missing $p"
+              exit 1
+            else
+              echo "OK: $p"
+            fi
+          done
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
+
   deploy:
     needs: build
     permissions:
