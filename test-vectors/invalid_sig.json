@@ -1,0 +1,13 @@
+{
+  "rid": "ar-1234567890",
+  "when": "2025-10-08T12:00:00Z",
+  "issuer": "did:web:openreceipts.dev",
+  "where": {"host": "example.com", "coarse": "US-West"},
+  "what": {"badge": "green", "kind": "ai-eval"},
+  "flags": [],
+  "metrics": {"score": 0.85},
+  "basis": "hash-of-input",
+  "kid": "key1",
+  "schema": "0.1",
+  "sig": "invalid0000c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b"
+}
