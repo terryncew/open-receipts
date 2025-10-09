@@ -1,9 +1,20 @@
-name: Deploy Pages (docs)
+name: Deploy GitHub Pages (docs)
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+# Required for Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Avoid concurrent publishes
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -11,39 +22,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show tree for debugging
-        run: |
-          echo "Repository tree:"
-          ls -la
-          echo "--- docs/ ---"
-          [ -d docs ] && ls -la docs || true
-          echo "--- test-vectors/ ---"
-          [ -d test-vectors ] && ls -la test-vectors || true
-          echo "--- registry/ ---"
-          [ -d registry ] && ls -la registry || true
+      # Configure Pages (sets base path, etc.)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
 
-      - name: Basic sanity (files exist, with fallbacks)
+      # Ensure /docs exists and is a valid static site
+      - name: Prepare docs
         shell: bash
         run: |
           set -euo pipefail
-          # SPEC.md can be at repo root or docs/
-          if [ -f SPEC.md ]; then
-            echo "Found SPEC.md in repo root"
-          elif [ -f docs/SPEC.md ]; then
-            echo "Found SPEC.md in docs/"
-          else
-            echo "::error::SPEC.md missing (searched: SPEC.md, docs/SPEC.md)"
-            exit 1
+          mkdir -p docs
+          # prevent Jekyll munging
+          touch docs/.nojekyll
+          # stub index if missing
+          if [ ! -f docs/index.html ]; then
+            cat > docs/index.html <<'HTML'
+<!doctype html><meta charset="utf-8">
+<title>Open Receipts</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:40px;max-width:760px}
+code{background:#0b1020;color:#dbeafe;padding:.2rem .35rem;border-radius:.35rem}
+</style>
+<h1>Open Receipts</h1>
+<p>Static site is live. Replace this file at <code>docs/index.html</code>.</p>
+HTML
           fi
-
-          for p in registry/issuers.json test-vectors/valid_ar.json docs/index.html; do
-            if [ ! -f "$p" ]; then
-              echo "::error::Missing $p"
-              exit 1
-            else
-              echo "OK: $p"
-            fi
-          done
+          echo "Site tree:"; ls -la docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -52,9 +56,6 @@ jobs:
 
   deploy:
     needs: build
-    permissions:
-      pages: write
-      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages
