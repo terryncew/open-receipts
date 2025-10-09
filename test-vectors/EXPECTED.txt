@@ -1,0 +1,6 @@
+valid_ar.json: PASS (with real signature)
+valid_gpr.json: PASS (with real signature)
+invalid_sig.json: FAIL (signature mismatch)
+wrong_key.json: FAIL (key mismatch)
+revoked.json: PASS (revocation receipt validates like any other)
+bad_c14n.json: FAIL (canonicalization / extra whitespace)
