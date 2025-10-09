@@ -1,3 +1,4 @@
+# .github/workflows/pages.yml
 name: Deploy GitHub Pages (docs)
 
 on:
@@ -5,13 +6,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# Required for Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Avoid concurrent publishes
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -22,32 +21,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Configure Pages (sets base path, etc.)
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      # Ensure /docs exists and is a valid static site
-      - name: Prepare docs
+      - name: Prepare docs folder
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p docs
-          # prevent Jekyll munging
           touch docs/.nojekyll
-          # stub index if missing
+          # keep your existing index if present
           if [ ! -f docs/index.html ]; then
             cat > docs/index.html <<'HTML'
 <!doctype html><meta charset="utf-8">
 <title>Open Receipts</title>
-<style>
-body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:40px;max-width:760px}
-code{background:#0b1020;color:#dbeafe;padding:.2rem .35rem;border-radius:.35rem}
-</style>
+<style>body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:40px;max-width:760px}code{background:#0b1020;color:#dbeafe;padding:.2rem .35rem;border-radius:.35rem}</style>
 <h1>Open Receipts</h1>
 <p>Static site is live. Replace this file at <code>docs/index.html</code>.</p>
 HTML
           fi
-          echo "Site tree:"; ls -la docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
