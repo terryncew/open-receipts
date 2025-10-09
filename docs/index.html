@@ -1,0 +1,178 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Open Receipts — Verify & Test (No Auth)</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#0b0c0f;--card:#111317;--text:#e5e7eb;--muted:#9aa2b1;--ok:#86efac;--warn:#fde68a;--err:#fca5a5;--border:#1f242c}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter}
+.wrap{max-width:1024px;margin:0 auto;padding:24px 16px 64px}
+h1{margin:0 0 6px;font-size:20px} .sub{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.grid{grid-template-columns:1fr 360px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
+.kv:last-child{border-bottom:none}
+.badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--border);font-weight:700}
+.b-green{background:rgba(22,163,74,.1)} .b-amber{background:rgba(245,158,11,.1)} .b-gold{background:rgba(212,175,55,.1)}
+.btnrow{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+button,.btn{min-width:200px;padding:14px 18px;border-radius:12px;border:1px solid #273142;background:#0e1724;color:#e5e7eb;cursor:pointer;font-weight:700}
+button.primary{background:#1d4ed8;border-color:#1e3a8a}
+.small{font-size:12px;color:var(--muted)} .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;background:#0e1218;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.tag{font-size:11px;border:1px solid #334155;border-radius:999px;padding:2px 8px}
+input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid #273142;background:#0d1117;color:#e5e7eb}
+</style></head><body><div class="wrap">
+<header>
+  <h1>Open Receipts — Verify & Test</h1>
+  <div class="sub">Tiny, signed event receipts. No auth, runs locally in your browser.</div>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <div class="kv"><div>Receipt</div><div id="rid">—</div></div>
+    <div class="kv"><div>When</div><div id="when">—</div></div>
+    <div class="kv"><div>Issuer</div><div id="issuer">—</div></div>
+    <div class="kv"><div>What</div><div><span id="badge" class="badge">—</span> <span id="kind">—</span></div></div>
+    <div class="kv"><div>Flags</div><div id="flags">—</div></div>
+    <div class="kv"><div>Signature</div><div class="small"><code id="sig">—</code></div></div>
+    <div class="kv"><div>Actions</div>
+      <div>
+        <div class="btnrow">
+          <button id="btnVerify" class="primary">Verify signature</button>
+          <button id="btnDownload">Download JSON</button>
+          <button id="btnCopy">Copy link</button>
+        </div>
+        <div id="status" class="small" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="card">
+    <strong>Load a receipt</strong>
+    <div style="height:8px"></div>
+    <select id="sourceSel">
+      <option value="latest">Latest (receipt.latest.json)</option>
+      <option value="pick">Pick from test vectors</option>
+      <option value="path">Enter path</option>
+    </select>
+    <div id="pathWrap" style="display:none;margin-top:8px">
+      <input type="text" id="path" placeholder="test-vectors/valid_ar.json">
+      <div class="btnrow" style="margin-top:8px"><button id="btnLoad">Load</button></div>
+    </div>
+    <div id="listWrap" class="list" style="display:none"></div>
+    <div style="height:12px"></div>
+    <strong>Public key (preset)</strong>
+    <div class="small">Using registry key for <code>did:web:openreceipts.dev</code>. No prompts.</div>
+    <div style="height:12px"></div>
+    <strong>Run all test vectors</strong>
+    <div class="btnrow" style="margin-top:8px">
+      <button id="btnRun" title="Structural + signature checks (valid signatures optional)">Run tests</button>
+    </div>
+    <div id="results" class="list"></div>
+  </aside>
+</div>
+
+<script src="verify.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let current=null, href=null, pubhex=null;
+
+async function loadJSON(p){ const r=await fetch(p,{cache:'no-store'}); if(!r.ok) throw new Error('load fail '+p); return r.json(); }
+
+function setBadge(b,k){
+  const el=$('badge'); el.className='badge';
+  const map={green:'b-green',amber:'b-amber',gold:'b-gold'};
+  if(map[b]) el.classList.add(map[b]); el.textContent=(b||'—').toUpperCase();
+  $('kind').textContent=k||'—';
+}
+function render(rec){
+  current=rec;
+  $('rid').textContent=rec.rid||'—';
+  $('when').textContent=rec.when||'—';
+  $('issuer').textContent=rec.issuer||'—';
+  setBadge(rec.what?.badge, rec.what?.kind);
+  $('flags').textContent=(rec.flags||[]).join(', ')||'—';
+  $('sig').textContent=(rec.sig||'').slice(0,24)+'…';
+  $('status').textContent='';
+}
+async function loadLatest(){
+  href='receipt.latest.json';
+  try{ const rec=await loadJSON(href); render(rec); }catch{ render({rid:'—',when:'—',issuer:'—',what:{badge:'amber',kind:'demo'},flags:[],sig:''}); $('status').textContent='No latest receipt found. Pick a test vector.' }
+}
+async function loadPath(p){ href=p; const rec=await loadJSON(p); render(rec); }
+async function loadIndex(){
+  const names=[
+    'test-vectors/valid_ar.json',
+    'test-vectors/valid_gpr.json',
+    'test-vectors/invalid_sig.json',
+    'test-vectors/wrong_key.json',
+    'test-vectors/revoked.json',
+    'test-vectors/bad_c14n.json'
+  ];
+  const list=$('listWrap'); list.innerHTML=''; names.forEach(n=>{
+    const row=document.createElement('div'); row.className='item';
+    const a=document.createElement('div'); a.textContent=n;
+    const b=document.createElement('div'); b.className='tag'; b.textContent='open';
+    row.appendChild(a); row.appendChild(b);
+    row.onclick=()=>loadPath(n);
+    list.appendChild(row);
+  });
+}
+async function loadKey(){
+  try{
+    const reg=await loadJSON('../registry/issuers.json');
+    pubhex = reg['did:web:openreceipts.dev'].ed25519_public_key_hex.replace(/^0x/,'');
+  }catch{ pubhex=null; }
+}
+$('sourceSel').onchange=e=>{
+  const v=e.target.value;
+  $('pathWrap').style.display = v==='path'?'block':'none';
+  $('listWrap').style.display = v==='pick'?'block':'none';
+  if(v==='latest') loadLatest();
+  if(v==='pick') loadIndex();
+};
+$('btnLoad').onclick=()=>{ const p=$('path').value.trim(); if(p) loadPath(p); };
+$('btnCopy').onclick=()=>{ if(!href) return; navigator.clipboard.writeText(location.href.replace(/index\.html.*$/,'')+href).then(()=>$('status').textContent='Link copied'); };
+$('btnDownload').onclick=()=>{ if(!href) return; const a=document.createElement('a'); a.href=href; a.download=href.split('/').pop(); a.click(); };
+
+$('btnVerify').onclick=async()=>{
+  const st=$('status'); if(!current){st.textContent='Load a receipt first.';return;}
+  if(!pubhex){st.textContent='Missing public key.';return;}
+  const ok = await OpenReceipts.verify(current, pubhex).catch(e=>{st.textContent='Verify error: '+e.message; return false;});
+  st.innerHTML = ok ? '<span class="ok">Signature valid ✔</span>' : '<span class="err">Signature failed ✖</span>';
+};
+
+$('btnRun').onclick=async()=>{
+  const files=[
+    ['valid_ar.json','PASS (with real signature)'],
+    ['valid_gpr.json','PASS (with real signature)'],
+    ['invalid_sig.json','FAIL'],
+    ['wrong_key.json','FAIL'],
+    ['revoked.json','PASS (structure + signature)'],
+    ['bad_c14n.json','FAIL']
+  ];
+  const box=$('results'); box.innerHTML='';
+  for(const [f,expect] of files){
+    const p='test-vectors/'+f;
+    let verdict='—';
+    try{
+      const rec=await loadJSON(p);
+      const hasSig = !!rec.sig;
+      const ok = pubhex && hasSig ? await OpenReceipts.verify(rec, pubhex).catch(()=>false) : false;
+      verdict = ok ? 'PASS' : 'FAIL';
+      // Note: two "valid" are using placeholder sigs until swapped → will show FAIL now (that’s ok).
+    }catch(e){ verdict='ERR'; }
+    const row=document.createElement('div'); row.className='item';
+    row.innerHTML = `<div>${f}</div><div class="tag">${verdict} • expected: ${expect}</div>`;
+    box.appendChild(row);
+  }
+  $('status').textContent='Test run complete.';
+};
+
+(async function boot(){
+  await loadKey();
+  await loadLatest();
+})();
+</script>
+</div></body></html>
