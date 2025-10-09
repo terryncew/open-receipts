@@ -1,0 +1,13 @@
+{
+  "rid": "rev-5555555555",
+  "when": "2025-10-10T10:00:00Z",
+  "issuer": "did:web:openreceipts.dev",
+  "where": {"host": "revoke.example.com", "coarse": "Global"},
+  "what": {"badge": "amber", "kind": "revocation", "revoke_of": "ar-1234567890"},
+  "flags": ["revoked"],
+  "metrics": {},
+  "basis": "security-issue",
+  "kid": "key1",
+  "schema": "0.1",
+  "sig": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+}
