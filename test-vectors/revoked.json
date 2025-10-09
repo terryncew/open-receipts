@@ -1,13 +1,22 @@
 {
-  "rid": "rev-5555555555",
-  "when": "2025-10-10T10:00:00Z",
+  "rid": "rev_2025-10-10T10-06-00Z_dddd",
+  "when": "2025-10-10T10:06:00Z",
   "issuer": "did:web:openreceipts.dev",
-  "where": {"host": "revoke.example.com", "coarse": "Global"},
-  "what": {"badge": "amber", "kind": "revocation", "revoke_of": "ar-1234567890"},
-  "flags": ["revoked"],
+  "where": {
+    "coarse": "Global",
+    "host": "revoke.example.com"
+  },
+  "what": {
+    "badge": "amber",
+    "kind": "revocation",
+    "revoke_of": "ar_2025-10-10T10-00-00Z_aaaa"
+  },
+  "flags": [
+    "revoked"
+  ],
   "metrics": {},
   "basis": "security-issue",
-  "kid": "key1",
-  "schema": "0.1",
-  "sig": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  "kid": "dev-1",
+  "schema": "or.v0.1",
+  "sig": "d232c8789cb2343159e8bfd0176b44b2e6e733b912c81dd44ab56bd50bd07c64da012b72cabeaa10ee1d9e07493a2196e73e27bfd5b3a8e3cd3f5aee4b0d0f04"
 }
