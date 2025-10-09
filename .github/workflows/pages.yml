@@ -29,15 +29,14 @@ jobs:
           set -euo pipefail
           mkdir -p docs
           touch docs/.nojekyll
-          # keep your existing index if present; otherwise write a stub
           if [ ! -f docs/index.html ]; then
-            cat > docs/index.html <<'HTML'
-            <!doctype html><meta charset="utf-8">
-            <title>Open Receipts</title>
-            <style>body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:40px;max-width:760px}code{background:#0b1020;color:#dbeafe;padding:.2rem .35rem;border-radius:.35rem}</style>
-            <h1>Open Receipts</h1>
-            <p>Static site is live. Replace this file at <code>docs/index.html</code>.</p>
-            HTML
+            printf '%s\n' \
+              '<!doctype html><meta charset="utf-8">' \
+              '<title>Open Receipts</title>' \
+              '<style>body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:40px;max-width:760px}code{background:#0b1020;color:#dbeafe;padding:.2rem .35rem;border-radius:.35rem}</style>' \
+              '<h1>Open Receipts</h1>' \
+              '<p>Static site is live. Replace this file at <code>docs/index.html</code>.</p>' \
+              > docs/index.html
           fi
           ls -la docs
 
