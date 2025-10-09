@@ -1,0 +1,5 @@
+{
+  "issuer": "did:web:openreceipts.dev",
+  "kid": "dev-1",
+  "ed25519_public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+}
