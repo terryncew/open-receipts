@@ -1,0 +1,13 @@
+{
+  "rid": "gpr-0987654321",
+  "when": "2025-10-09T14:30:00Z",
+  "issuer": "did:web:openreceipts.dev",
+  "where": {"host": "api.example.com", "coarse": "EU-Central"},
+  "what": {"badge": "gold", "kind": "policy-bill"},
+  "flags": ["urgent"],
+  "metrics": {"impact": 95},
+  "basis": "prev-receipt-rid",
+  "kid": "key1",
+  "schema": "0.1",
+  "sig": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+}
