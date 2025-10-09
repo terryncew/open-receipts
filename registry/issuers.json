@@ -1,8 +1,10 @@
 {
-  "did:web:openreceipts.dev": {
-    "ed25519_public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
-    "schema_min": "0.1",
-    "schema_max": "0.1",
-    "kids": ["key1"]
-  }
+  "issuers": [
+    {
+      "issuer": "did:web:openreceipts.dev",
+      "kid": "dev-1",
+      "ed25519_public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+      "updated": "2025-10-10T10:00:00Z"
+    }
+  ]
 }
