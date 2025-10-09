@@ -1,0 +1,11 @@
+{
+  "rid": "demo-hello",
+  "when": "2025-10-08T12:00:00Z",
+  "issuer": "did:web:openreceipts.dev",
+  "where": {"host":"docs","coarse":"demo"},
+  "what": {"badge":"amber","kind":"demo"},
+  "flags": ["route:pick-a-test-vector"],
+  "kid": "key1",
+  "schema": "0.1",
+  "sig": ""
+}
