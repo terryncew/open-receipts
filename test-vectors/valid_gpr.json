@@ -1,13 +1,33 @@
 {
-  "rid": "gpr-0987654321",
-  "when": "2025-10-09T14:30:00Z",
+  "rid": "gpr_2025-10-10T10-05-00Z_bbbb",
+  "when": "2025-10-10T10:05:00Z",
   "issuer": "did:web:openreceipts.dev",
-  "where": {"host": "api.example.com", "coarse": "EU-Central"},
-  "what": {"badge": "gold", "kind": "policy-bill"},
-  "flags": ["urgent"],
-  "metrics": {"impact": 95},
-  "basis": "prev-receipt-rid",
-  "kid": "key1",
-  "schema": "0.1",
-  "sig": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+  "where": {
+    "coarse": "EU-Central",
+    "host": "api.example.com"
+  },
+  "what": {
+    "badge": "gold",
+    "kind": "promotion"
+  },
+  "flags": [
+    "approved"
+  ],
+  "metrics": {
+    "impact": 95
+  },
+  "basis": {
+    "eval_refs": [
+      "evr_x",
+      "evr_y"
+    ],
+    "label_ref": "lbr_2025-10-10T10-03-00Z_cccc"
+  },
+  "policy_checks": {
+    "consent": "pass",
+    "pii": "pass"
+  },
+  "kid": "dev-1",
+  "schema": "or.v0.1",
+  "sig": "cc1f8d6d9051f7fc2b7f1e0f5f55af1d0f84d4153a00fdaec65276d6d3d29f5b9e729bf7fe0c4c0e5d4cc3fb4f8248d1162c977e7d4779bb57e78e58b44f0099"
 }
