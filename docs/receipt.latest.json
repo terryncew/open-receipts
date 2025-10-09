@@ -1,11 +1,13 @@
 {
-  "rid": "demo-hello",
+  "rid": "ar_demo_2025-10-08T12-00-00Z",
   "when": "2025-10-08T12:00:00Z",
   "issuer": "did:web:openreceipts.dev",
-  "where": {"host":"docs","coarse":"demo"},
-  "what": {"badge":"amber","kind":"demo"},
-  "flags": ["route:pick-a-test-vector"],
-  "kid": "key1",
-  "schema": "0.1",
+  "where": { "host": "demo", "coarse": "local" },
+  "what": { "badge": "amber", "kind": "case" },
+  "flags": ["amber:unconfirmed","route:experiment"],
+  "metrics": { "unconfirmed_ratio": 0.41, "motif_distance": 0.62 },
+  "basis": "sha256:example",
+  "kid": "dev-1",
+  "schema": "open-receipts/0.1",
   "sig": ""
 }
