@@ -1,0 +1,93 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Open Receipts — Sign Test Vectors</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:24px;max-width:880px}
+  pre,textarea{background:#0b1020;color:#e5e7eb;padding:10px;border-radius:8px;border:1px solid #1f2937}
+  button{padding:10px 14px;border-radius:10px;border:1px solid #1f2937;background:#111827;color:#e5e7eb;cursor:pointer}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .card{border:1px solid #1f2937;border-radius:12px;padding:12px;margin:14px 0}
+</style>
+<h1>Sign Open-Receipts Test Vectors</h1>
+<p>This signs three vectors (<code>valid_ar.json</code>, <code>valid_gpr.json</code>, <code>revoked.json</code>) using a fixed Ed25519 dev key and shows the updated JSON (with <code>sig</code> filled). Copy the output back into files under <code>test-vectors/</code>.</p>
+
+<div class="card">
+  <h3>Dev key (fixed, public in registry)</h3>
+  <p><b>Private (32-byte hex, DEV-ONLY!):</b>
+    <code id="priv">9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60</code></p>
+  <p><b>Computed public key (hex):</b> <code id="pub">…</code></p>
+  <p>Registry DID used by vectors: <code>did:web:openreceipts.dev</code>, <code>kid</code> = <code>dev-1</code>.</p>
+</div>
+
+<div class="row"><button id="run">Fetch & sign</button><span id="status"></span></div>
+
+<div id="out"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@noble/ed25519@2.1.0/ed25519.min.js" integrity="sha384-A8V1l7z0rjWw2Vx2oP2fZ3rRz1wV3sJrOk8pKq5GQx4dQxkz6q8uV3b8D5l5T8lT" crossorigin="anonymous"></script>
+<script>
+const RAW = 'https://raw.githubusercontent.com/terryncew/open-receipts/main/';
+const FILES = [
+  'test-vectors/valid_ar.json',
+  'test-vectors/valid_gpr.json',
+  'test-vectors/revoked.json'
+];
+const PRIV_HEX = document.getElementById('priv').textContent.trim();
+
+const hexToBytes = (h)=>Uint8Array.from(h.match(/.{1,2}/g).map(b=>parseInt(b,16)));
+const bytesToHex = (b)=>Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+
+function sortKeysDeep(obj){
+  if (Array.isArray(obj)) return obj.map(sortKeysDeep);
+  if (obj && typeof obj==='object'){
+    const out={};
+    Object.keys(obj).sort().forEach(k=>out[k]=sortKeysDeep(obj[k]));
+    return out;
+  }
+  return obj;
+}
+
+async function canonicalizeWithoutSig(obj){
+  const tmp = JSON.parse(JSON.stringify(obj));
+  delete tmp.sig;
+  return JSON.stringify(sortKeysDeep(tmp));
+}
+
+async function fetchJSON(path){
+  const r = await fetch(RAW+path, {cache:'no-store'});
+  if(!r.ok) throw new Error('fetch '+path+' failed: '+r.status);
+  return await r.json();
+}
+
+async function main(){
+  const status = document.getElementById('status');
+  try{
+    const pub = await nobleEd25519.getPublicKey(PRIV_HEX);
+    document.getElementById('pub').textContent = bytesToHex(pub);
+
+    const out = document.getElementById('out');
+    out.innerHTML = '';
+    for (const path of FILES){
+      const rec = await fetchJSON(path);
+      const canon = await canonicalizeWithoutSig(rec);
+      const msg = new TextEncoder().encode(canon);
+      const sig = await nobleEd25519.sign(msg, PRIV_HEX);
+      rec.sig = bytesToHex(sig);
+      const ta = document.createElement('textarea');
+      ta.rows = 16; ta.style.width='100%';
+      ta.value = JSON.stringify(rec, null, 2);
+      const wrap = document.createElement('div'); wrap.className='card';
+      const h = document.createElement('h3'); h.textContent = path+' (updated)';
+      const row = document.createElement('div'); row.className='row';
+      const btn = document.createElement('button'); btn.textContent='Copy JSON';
+      btn.onclick = ()=>{ ta.select(); document.execCommand('copy'); };
+      row.appendChild(btn);
+      wrap.appendChild(h); wrap.appendChild(row); wrap.appendChild(ta);
+      out.appendChild(wrap);
+    }
+    status.textContent = 'Done. Copy each JSON back into its file and commit.';
+  }catch(e){
+    status.textContent = 'Error: '+(e.message||e);
+  }
+}
+document.getElementById('run').onclick = main;
+</script>
