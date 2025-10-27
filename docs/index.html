@@ -1,76 +1,96 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Open Receipts — Verify & Test (No Auth)</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Open Receipts — Verify & Test (OLR/1.5 compatible)</title>
 <link rel="icon" href="data:,">
 <style>
-:root{--bg:#0b0c0f;--card:#111317;--text:#e5e7eb;--muted:#9aa2b1;--ok:#86efac;--warn:#fde68a;--err:#fca5a5;--border:#1f242c}
+:root{--bg:#0b0c0f;--card:#111317;--text:#e5e7eb;--muted:#9aa2b1;--ok:#86efac;--warn:#fde68a;--err:#fca5a5;--border:#1f242c;--pill:#0e1724}
 html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter}
 .wrap{max-width:1024px;margin:0 auto;padding:24px 16px 64px}
-h1{margin:0 0 6px;font-size:20px} .sub{color:var(--muted);font-size:14px}
+h1{margin:0 0 6px;font-size:20px}.sub{color:var(--muted);font-size:14px}
 .grid{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:900px){.grid{grid-template-columns:1fr 360px}}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
 .kv{display:grid;grid-template-columns:160px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
 .kv:last-child{border-bottom:none}
-.badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--border);font-weight:700}
-.b-green{background:rgba(22,163,74,.1)} .b-amber{background:rgba(245,158,11,.1)} .b-gold{background:rgba(212,175,55,.1)}
+.badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--border);font-weight:700;background:var(--pill)}
+.b-green{background:rgba(22,163,74,.12)}.b-amber{background:rgba(245,158,11,.12)}.b-red{background:rgba(239,68,68,.12)}.b-gold{background:rgba(212,175,55,.12)}
 .btnrow{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
 button,.btn{min-width:200px;padding:14px 18px;border-radius:12px;border:1px solid #273142;background:#0e1724;color:#e5e7eb;cursor:pointer;font-weight:700}
 button.primary{background:#1d4ed8;border-color:#1e3a8a}
-.small{font-size:12px;color:var(--muted)} .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)}
+.small{font-size:12px;color:var(--muted)}.ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
 .list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .item{display:flex;justify-content:space-between;align-items:center;background:#0e1218;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
 .tag{font-size:11px;border:1px solid #334155;border-radius:999px;padding:2px 8px}
 input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid #273142;background:#0d1117;color:#e5e7eb}
-</style></head><body><div class="wrap">
-<header>
-  <h1>Open Receipts — Verify & Test</h1>
-  <div class="sub">Tiny, signed event receipts. No auth, runs locally in your browser.</div>
-</header>
+.dials{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:12px;border:1px solid #334155;border-radius:10px;padding:6px 8px;background:#0c121a}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Open Receipts — Verify & Test</h1>
+    <div class="sub">Tiny, signed event receipts. Now recognizes <b>OLR/1.5</b> (dials) and older AR/GPR shapes.</div>
+  </header>
 
-<div class="grid">
-  <div class="card">
-    <div class="kv"><div>Receipt</div><div id="rid">—</div></div>
-    <div class="kv"><div>When</div><div id="when">—</div></div>
-    <div class="kv"><div>Issuer</div><div id="issuer">—</div></div>
-    <div class="kv"><div>What</div><div><span id="badge" class="badge">—</span> <span id="kind">—</span></div></div>
-    <div class="kv"><div>Flags</div><div id="flags">—</div></div>
-    <div class="kv"><div>Signature</div><div class="small"><code id="sig">—</code></div></div>
-    <div class="kv"><div>Actions</div>
-      <div>
-        <div class="btnrow">
-          <button id="btnVerify" class="primary">Verify signature</button>
-          <button id="btnDownload">Download JSON</button>
-          <button id="btnCopy">Copy link</button>
+  <div class="grid">
+    <div class="card">
+      <div class="kv"><div>Receipt</div><div id="rid">—</div></div>
+      <div class="kv"><div>When</div><div id="when">—</div></div>
+      <div class="kv"><div>Issuer</div><div id="issuer">—</div></div>
+      <div class="kv"><div>Status</div><div><span id="badge" class="badge">—</span></div></div>
+      <div class="kv"><div>Policy</div><div id="policy">—</div></div>
+      <div class="kv"><div>Signals</div><div id="signals">—</div></div>
+      <div class="kv" id="dialsRow" style="display:none">
+        <div>Dials (q8)</div>
+        <div class="dials">
+          <span class="chip">∂Φ/∂κ: <b id="grad">—</b></span>
+          <span class="chip">d²Φ/dt²: <b id="curv">—</b></span>
+          <span class="chip">freshness: <b id="fresh">—</b></span>
+          <span class="small" style="align-self:center">q8 maps [-1..+1] → [0..255], 128 ≈ 0</span>
         </div>
-        <div id="status" class="small" style="margin-top:8px"></div>
+      </div>
+      <div class="kv"><div>Flags</div><div id="flags">—</div></div>
+      <div class="kv"><div>Signature</div><div class="small"><code id="sig">—</code></div></div>
+      <div class="kv"><div>Actions</div>
+        <div>
+          <div class="btnrow">
+            <button id="btnVerify" class="primary">Verify signature</button>
+            <button id="btnDownload">Download JSON</button>
+            <button id="btnCopy">Copy link</button>
+          </div>
+          <div id="status" class="small" style="margin-top:8px"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <aside class="card">
-    <strong>Load a receipt</strong>
-    <div style="height:8px"></div>
-    <select id="sourceSel">
-      <option value="latest">Latest (receipt.latest.json)</option>
-      <option value="pick">Pick from test vectors</option>
-      <option value="path">Enter path</option>
-    </select>
-    <div id="pathWrap" style="display:none;margin-top:8px">
-      <input type="text" id="path" placeholder="test-vectors/valid_ar.json">
-      <div class="btnrow" style="margin-top:8px"><button id="btnLoad">Load</button></div>
-    </div>
-    <div id="listWrap" class="list" style="display:none"></div>
-    <div style="height:12px"></div>
-    <strong>Public key (preset)</strong>
-    <div class="small">Using registry key for <code>did:web:openreceipts.dev</code>. No prompts.</div>
-    <div style="height:12px"></div>
-    <strong>Run all test vectors</strong>
-    <div class="btnrow" style="margin-top:8px">
-      <button id="btnRun" title="Structural + signature checks (valid signatures optional)">Run tests</button>
-    </div>
-    <div id="results" class="list"></div>
-  </aside>
+    <aside class="card">
+      <strong>Load a receipt</strong>
+      <div style="height:8px"></div>
+      <select id="sourceSel">
+        <option value="latest">Latest (receipt.latest.json)</option>
+        <option value="pick">Pick from test vectors</option>
+        <option value="path">Enter path</option>
+      </select>
+      <div id="pathWrap" style="display:none;margin-top:8px">
+        <input type="text" id="path" placeholder="test-vectors/olr15_amber.json">
+        <div class="btnrow" style="margin-top:8px"><button id="btnLoad">Load</button></div>
+      </div>
+      <div id="listWrap" class="list" style="display:none"></div>
+      <div style="height:12px"></div>
+      <strong>Public key (preset)</strong>
+      <div class="small">Using registry key for <code>did:web:openreceipts.dev</code>. No prompts.</div>
+      <div style="height:12px"></div>
+      <strong>Run all test vectors</strong>
+      <div class="btnrow" style="margin-top:8px">
+        <button id="btnRun" title="Structural + signature checks (valid sigs optional)">Run tests</button>
+      </div>
+      <div id="results" class="list"></div>
+    </aside>
+  </div>
 </div>
 
 <script src="verify.js"></script>
@@ -80,29 +100,68 @@ let current=null, href=null, pubhex=null;
 
 async function loadJSON(p){ const r=await fetch(p,{cache:'no-store'}); if(!r.ok) throw new Error('load fail '+p); return r.json(); }
 
-function setBadge(b,k){
+// --------- helpers (OLR/1.5 + older) ----------
+const getStatus = r => (r?.attrs?.status)||(r?.what?.badge)||(r?.status)||'—';
+const getWhen   = r => (r?.attrs?.ts)||(r?.when)||'—';
+const getRunId  = r => (r?.attrs?.run_id)||(r?.rid)||'—';
+const getIssuer = r => (r?.issuer)||(r?.attrs?.issuer)||'—';
+
+function setBadge(status){
   const el=$('badge'); el.className='badge';
-  const map={green:'b-green',amber:'b-amber',gold:'b-gold'};
-  if(map[b]) el.classList.add(map[b]); el.textContent=(b||'—').toUpperCase();
-  $('kind').textContent=k||'—';
+  const map={green:'b-green',amber:'b-amber',red:'b-red',gold:'b-gold'};
+  if(map[status]) el.classList.add(map[status]);
+  el.textContent=(status||'—').toUpperCase();
 }
+function q8(b){ const x=(Number(b)-128)/127; return Math.max(-1,Math.min(1,x)); }
+
+// --------- render ----------
 function render(rec){
-  current=rec;
-  $('rid').textContent=rec.rid||'—';
-  $('when').textContent=rec.when||'—';
-  $('issuer').textContent=rec.issuer||'—';
-  setBadge(rec.what?.badge, rec.what?.kind);
-  $('flags').textContent=(rec.flags||[]).join(', ')||'—';
-  $('sig').textContent=(rec.sig||'').slice(0,24)+'…';
-  $('status').textContent='';
+  current=rec; $('status').textContent='';
+
+  $('rid').textContent = getRunId(rec);
+  $('when').textContent = getWhen(rec);
+  $('issuer').textContent = getIssuer(rec);
+
+  const status = String(getStatus(rec)).toLowerCase();
+  setBadge(status);
+
+  // Policy
+  const pol = rec?.policy || rec?.what?.policy || {};
+  $('policy').textContent = pol?.policy_id ? `${pol.policy_id}${pol.policy_hash ? ' · '+pol.policy_hash.slice(0,14)+'…' : ''}` : '—';
+
+  // Signals (OLR/1.5 keys if present)
+  const s = rec?.signals || {};
+  const sigs=[];
+  if(Number.isFinite(+s.kappa)) sigs.push(`κ=${(+s.kappa).toFixed(3)}`);
+  if(Number.isFinite(+s.dhol))  sigs.push(`Δhol=${(+s.dhol).toFixed(3)}`);
+  if(Number.isFinite(+s.phi_star)) sigs.push(`Φ*=${(+s.phi_star).toFixed(2)}`);
+  $('signals').textContent = sigs.length ? sigs.join(' · ') : '—';
+
+  // Dials (only on non-green and only if present)
+  const d = rec?.telem?.dials || {};
+  if(status!=='green' && d && ('dphi_dk_q8' in d) && ('d2phi_dt2_q8' in d) && ('fresh_ratio_q8' in d)){
+    $('dialsRow').style.display='grid';
+    $('grad').textContent  = q8(d.dphi_dk_q8).toFixed(2);
+    $('curv').textContent  = q8(d.d2phi_dt2_q8).toFixed(2);
+    $('fresh').textContent = q8(d.fresh_ratio_q8).toFixed(2);
+  } else { $('dialsRow').style.display='none'; }
+
+  // Flags (old receipts)
+  $('flags').textContent = (rec.flags||[]).join(', ') || '—';
+
+  // Signature
+  $('sig').textContent = (rec.sig||'').slice(0,24)+'…';
 }
+
 async function loadLatest(){
   href='receipt.latest.json';
-  try{ const rec=await loadJSON(href); render(rec); }catch{ render({rid:'—',when:'—',issuer:'—',what:{badge:'amber',kind:'demo'},flags:[],sig:''}); $('status').textContent='No latest receipt found. Pick a test vector.' }
+  try{ render(await loadJSON(href)); }
+  catch{ render({attrs:{status:'amber',ts:'—',run_id:'—'},issuer:'—',flags:[],sig:''}); $('status').textContent='No latest receipt found. Pick a test vector.'; }
 }
-async function loadPath(p){ href=p; const rec=await loadJSON(p); render(rec); }
+async function loadPath(p){ href=p; render(await loadJSON(p)); }
 async function loadIndex(){
   const names=[
+    'test-vectors/olr15_amber.json',
     'test-vectors/valid_ar.json',
     'test-vectors/valid_gpr.json',
     'test-vectors/invalid_sig.json',
@@ -110,7 +169,8 @@ async function loadIndex(){
     'test-vectors/revoked.json',
     'test-vectors/bad_c14n.json'
   ];
-  const list=$('listWrap'); list.innerHTML=''; names.forEach(n=>{
+  const list=$('listWrap'); list.innerHTML='';
+  names.forEach(n=>{
     const row=document.createElement('div'); row.className='item';
     const a=document.createElement('div'); a.textContent=n;
     const b=document.createElement('div'); b.className='tag'; b.textContent='open';
@@ -125,31 +185,36 @@ async function loadKey(){
     pubhex = reg['did:web:openreceipts.dev'].ed25519_public_key_hex.replace(/^0x/,'');
   }catch{ pubhex=null; }
 }
+
+// --------- UI wiring ----------
 $('sourceSel').onchange=e=>{
   const v=e.target.value;
   $('pathWrap').style.display = v==='path'?'block':'none';
   $('listWrap').style.display = v==='pick'?'block':'none';
   if(v==='latest') loadLatest();
-  if(v==='pick') loadIndex();
+  if(v==='pick')   loadIndex();
 };
 $('btnLoad').onclick=()=>{ const p=$('path').value.trim(); if(p) loadPath(p); };
-$('btnCopy').onclick=()=>{ if(!href) return; navigator.clipboard.writeText(location.href.replace(/index\.html.*$/,'')+href).then(()=>$('status').textContent='Link copied'); };
+$('btnCopy').onclick=()=>{ if(!href) return; const abs = location.href.replace(/index\.html.*$/,'')+href; navigator.clipboard.writeText(abs).then(()=>$('status').textContent='Link copied'); };
 $('btnDownload').onclick=()=>{ if(!href) return; const a=document.createElement('a'); a.href=href; a.download=href.split('/').pop(); a.click(); };
 
 $('btnVerify').onclick=async()=>{
   const st=$('status'); if(!current){st.textContent='Load a receipt first.';return;}
   if(!pubhex){st.textContent='Missing public key.';return;}
-  const ok = await OpenReceipts.verify(current, pubhex).catch(e=>{st.textContent='Verify error: '+e.message; return false;});
-  st.innerHTML = ok ? '<span class="ok">Signature valid ✔</span>' : '<span class="err">Signature failed ✖</span>';
+  try{
+    const ok = await OpenReceipts.verify(current, pubhex);
+    st.innerHTML = ok ? '<span class="ok">Signature valid ✔</span>' : '<span class="err">Signature failed ✖</span>';
+  }catch(e){ st.innerHTML='<span class="err">Verify error: '+(e.message||e)+'</span>'; }
 };
 
 $('btnRun').onclick=async()=>{
   const files=[
-    ['valid_ar.json','PASS (with real signature)'],
-    ['valid_gpr.json','PASS (with real signature)'],
+    ['olr15_amber.json','N/A (no sig, structure only)'],
+    ['valid_ar.json','PASS (real sig)'],
+    ['valid_gpr.json','PASS (real sig)'],
     ['invalid_sig.json','FAIL'],
     ['wrong_key.json','FAIL'],
-    ['revoked.json','PASS (structure + signature)'],
+    ['revoked.json','PASS (structure + sig)'],
     ['bad_c14n.json','FAIL']
   ];
   const box=$('results'); box.innerHTML='';
@@ -159,10 +224,9 @@ $('btnRun').onclick=async()=>{
     try{
       const rec=await loadJSON(p);
       const hasSig = !!rec.sig;
-      const ok = pubhex && hasSig ? await OpenReceipts.verify(rec, pubhex).catch(()=>false) : false;
-      verdict = ok ? 'PASS' : 'FAIL';
-      // Note: two "valid" are using placeholder sigs until swapped → will show FAIL now (that’s ok).
-    }catch(e){ verdict='ERR'; }
+      const ok = (pubhex && hasSig) ? await OpenReceipts.verify(rec, pubhex).catch(()=>false) : false;
+      verdict = hasSig ? (ok?'PASS':'FAIL') : 'N/A';
+    }catch{ verdict='ERR'; }
     const row=document.createElement('div'); row.className='item';
     row.innerHTML = `<div>${f}</div><div class="tag">${verdict} • expected: ${expect}</div>`;
     box.appendChild(row);
@@ -170,9 +234,11 @@ $('btnRun').onclick=async()=>{
   $('status').textContent='Test run complete.';
 };
 
+// --------- boot ----------
 (async function boot(){
   await loadKey();
   await loadLatest();
 })();
 </script>
-</div></body></html>
+</body>
+</html>
