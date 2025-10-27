@@ -1,24 +1,19 @@
 {
-  "rid": "ar_2025-10-10T10-00-00Z_aaaa",
-  "when": "2025-10-10T10:00:00Z",
-  "issuer": "did:web:openreceipts.dev",
-  "where": {
-    "coarse": "US-West",
-    "host": "example.com"
+  "receipt_version": "olr/1.5",
+  "attrs": { "status": "amber", "ts": "2025-10-01T12:00:00Z", "run_id": "demo-001" },
+  "policy": {
+    "policy_id": "openline/policy.v1",
+    "policy_hash": "sha256:6babccff24555fa448e5d0dcfd9c1404cd1d1e8c6ca7c151bc675fd7235f8ed6"
   },
-  "what": {
-    "badge": "amber",
-    "kind": "case"
+  "signals": { "phi_star": 0.68, "kappa": 0.82, "dhol": 0.22 },
+  "telem": {
+    "dials": {
+      "dphi_dk_q8": 148,
+      "d2phi_dt2_q8": 112,
+      "fresh_ratio_q8": 164,
+      "scale": "q8_signed",
+      "description": "q8 maps [-1..1] to [0..255], 128≈0"
+    }
   },
-  "flags": [
-    "amber:novel",
-    "route:experiment"
-  ],
-  "metrics": {
-    "score": 85
-  },
-  "basis": "sha256:inputs-abc",
-  "kid": "dev-1",
-  "schema": "or.v0.1",
-  "sig": "f6d10561d3551e0730bdd7cf13e69e3a7be99fb5f0958fbfd5e9fec0b0946f27d5b71e4c1fd7ff4cdbd75c370a2f67fbe8b9fea21d3f1889e89b30a705d3c478"
+  "guards": { "ucr": 0.18, "cycles": 0, "contradictions": 0 }
 }
