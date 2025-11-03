@@ -1,7 +1,15 @@
-"model": "demo-llm/receipts",
-"precision": "bf16/fp16",
-"point": "bf16 reduces overflow without retraining.",
-"because": "Stability improves under long prompts.",
-"but": "Minor throughput penalty on some cards.",
-"so": "Use for long-context tests; swap back to fp16 for quick demos.",
-"k": 0.18, "dhol": 0.013, "fresh": 0.91
+{
+  "receipt_version":"1.5-P",
+  "version":"OLR/1.5-P",
+  "attrs":{"ts":"2025-11-02T00:00:00Z","run_id":"olr15-demo","issuer":"did:web:openreceipts.dev","status":"amber"},
+  "model":"openreceipts-verifier",
+  "issued":"2025-11-02T00:00:00Z",
+  "precision":"n/a",
+  "point":"OLR/1.5 structure check with dials.",
+  "because":"Gradient spikes under stress test vectors.",
+  "but":"Signature optional in demo mode.",
+  "so":"Use for structure; bring your key for sig PASS.",
+  "signals":{"kappa":0.62,"dhol":0.28},
+  "telem":{"dials":{"dphi_dk_q8":208,"d2phi_dt2_q8":196,"fresh_ratio_q8":112}},
+  "sig":""
+}
